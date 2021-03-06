@@ -1,12 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import 'antd/dist/antd.less'
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import WhiteList from './pages/white-list/index'
+import Cheeio from './pages/cheeio/index'
+import BasicLayout from './layout/BaseLayout'
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <BasicLayout>
+      <Cheeio />
+    </BasicLayout>
   </React.StrictMode>,
   document.getElementById('root')
 );
