@@ -6,13 +6,17 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import WhiteList from './pages/white-list/index'
 import Cheeio from './pages/cheeio/index'
-import BasicLayout from './layout/BaseLayout'
+import zhCN from 'antd/lib/locale/zh_CN';
+import { ConfigProvider } from 'antd';
+import { AuthProvider } from './context/auth-context';
 
 ReactDOM.render(
   <React.StrictMode>
-    <BasicLayout>
-      <Cheeio />
-    </BasicLayout>
+    <AuthProvider>
+      <ConfigProvider locale={zhCN}>
+        <App />
+      </ConfigProvider>
+    </AuthProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

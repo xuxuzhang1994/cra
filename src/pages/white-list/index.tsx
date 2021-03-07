@@ -1,8 +1,5 @@
-import { Table, Space, Input, PaginationProps, Card, Row, Col, Modal } from "antd";
-import React, { useEffect, useState } from "react";
-import qs from 'qs';
-import { PaginationType } from "antd/lib/transfer/interface";
-import { AudioOutlined } from '@ant-design/icons';
+import { Table, Space, Input, PaginationProps, Card, Row, Col, Modal, message } from "antd";
+import React, { ChangeEvent, SyntheticEvent, useEffect, useState } from "react";
 import styles from './index.module.less'
 import { http } from '../../utils/http'
 
@@ -10,19 +7,31 @@ const { Search } = Input;
 
 interface EditModalProps {
   visible: boolean,
-  onOk?: () => void,
+  onOk?: (value: any) => void,
   onCancel?: () => void,
   info: User | any
 }
 
 const EditModal = ({info, ...modalProps} : EditModalProps) => {
-  console.log(modalProps)
+  const [value, setValue] = useState('')
+  const onOk = () => {
+    modalProps.onOk && modalProps.onOk(value)
+  }
+  const inputChange = (e: ChangeEvent<{value: string}>) => {
+    console.log(e.target.value)
+    setValue(e.target.value)
+  }
+  useEffect(() => {
+    if(!modalProps.visible){
+      setValue('')
+    }
+  },[modalProps.visible])
   return (
-    <Modal title="修改信息" {...modalProps}>
+    <Modal title="修改信息" {...modalProps} onOk={onOk}>
       <p>你要修改的条目为 </p>
       <p>手机号：{info?.mobile}</p>
       <p>身份证号：{info?.number}</p>
-      <Input placeholder="请输入正确的手机号" />
+      <Input value={value} placeholder="请输入正确的手机号" onChange={inputChange} />
     </Modal>
   )
 }
@@ -98,7 +107,6 @@ const Index = (props: unknown) => {
   const [userInfo, setUserInfo] = useState({
     id: ''
   })
-
   const onSearch = (value: string) => {
     setIsLoading(true)
     http(`whiteList/getlist`, {
@@ -119,7 +127,7 @@ const Index = (props: unknown) => {
     })
   }
 
-  const fetchData = (params: { page: number, limit: number }) => {
+  const fetchData = (params: { page?: number, limit?: number }) => {
     setIsLoading(true)
     http(`whiteList/getlist`, {
       data: params
@@ -137,24 +145,35 @@ const Index = (props: unknown) => {
     })
   }
 
-  const onOk = () => {
+  const onOk = (value: any) => {
     http('/whiteList/update',{
       method: 'PUT',
       data: {
         id: userInfo.id,
+        mobile: value
+      }
+    }).then(data => {
+      if(data.code == 200){
+        setModalVisible(false)
+        message.success('更新成功！')
+        fetchData({
+          page: pagination.current,
+          limit: pagination.pageSize,
+        })
+      }else{
+        message.error(data.data)
       }
     })
-    console.log(11111111111)
   }
 
   return <div>
     <div className={styles.searchBox}>
       <Row>
-        <Col span={6}> <Search placeholder="输入手机号搜索" onSearch={onSearch} enterButton /> </Col>
+        <Col xl={8} md={12} sm={24} xs={24}> <Search placeholder="输入手机号搜索" onSearch={onSearch} enterButton /> </Col>
       </Row>
     </div>
     <Card>
-      <Table rowKey="id" loading={isLoading} dataSource={dataSource} columns={columns} pagination={pagination} />
+      <Table scroll={{x: '100%'}} rowKey="id" loading={isLoading} dataSource={dataSource} columns={columns} pagination={pagination} />
     </Card>
     <EditModal visible={modalVisible} info={userInfo} onOk={onOk} onCancel={() => setModalVisible(false)} />
   </div>
